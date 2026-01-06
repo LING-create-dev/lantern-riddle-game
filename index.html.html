@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新春猜灯谜大赛 - 纯净版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 50%, #ff1744 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            color: #333;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+            min-height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff1744 0%, #ff6b6b 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '🏮';
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.2;
+            top: -10px;
+            left: -10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .header::after {
+            content: '🏮';
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.3;
+            bottom: -5px;
+            right: -5px;
+            animation: float 2s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-area {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .progress-bar {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ff1744);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+        }
+        
+        .question-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+            border: 2px solid #ff6b6b;
+            border-radius: 15px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.2);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 200px;
+        }
+        
+        .question-number {
+            color: #ff1744;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .riddle-text {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .riddle-hint {
+            font-size: 16px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 18px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .option:hover, .option:active {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .option.selected {
+            border-color: #ff1744;
+            background: #ff1744;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 23, 68, 0.4);
+        }
+        
+        .option.correct {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+            animation: correctPulse 0.6s ease;
+        }
+        
+        .option.wrong {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+            animation: wrongShake 0.6s ease;
+        }
+        
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff1744 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover, .btn-primary:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .score-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff1744;
+            margin-bottom: 10px;
+        }
+        
+        .score-text {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #f0f8ff 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .result-excellent {
+            color: #4caf50;
+        }
+        
+        .result-poor {
+            color: #f44336;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                font-size: 16px;
+            }
+            
+            .container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 15px;
+                min-height: calc(100vh - 10px);
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+            
+            .header p {
+                font-size: 12px;
+            }
+            
+            .game-area {
+                padding: 15px;
+            }
+            
+            .question-card {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+                min-height: 180px;
+            }
+            
+            .riddle-text {
+                font-size: 18px;
+                line-height: 1.5;
+                margin-bottom: 15px;
+            }
+            
+            .option {
+                padding: 15px 12px;
+                font-size: 16px;
+                min-height: 55px;
+                border-radius: 12px;
+            }
+            
+            .btn {
+                padding: 15px;
+                font-size: 16px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+            }
+        }
+        
+        /* 触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .option:hover {
+                transform: none;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            
+            .btn:hover {
+                transform: none;
+            }
+            
+            .option:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+            
+            .btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏮 新春猜灯谜大赛 🏮</h1>
+            <p>传统文化，智慧挑战</p>
+            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
+                题库共30题 · 每次随机3题 · 纯净游戏版
+            </div>
+        </div>
+        
+        <!-- 游戏界面 -->
+        <div id="gameScreen" class="game-area">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-number" id="questionNumber">第 1 题</div>
+                <div class="riddle-text" id="riddleText">正在加载题目...</div>
+                <div class="riddle-hint" id="riddleHint"></div>
+            </div>
+            
+            <div class="options" id="optionsContainer">
+                <!-- 选项将通过JavaScript动态生成 -->
+            </div>
+            
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>
+                下一题
+            </button>
+        </div>
+        
+        <!-- 结果界面 -->
+        <div id="resultScreen" class="game-area hidden">
+            <div class="result-card">
+                <div class="result-title" id="resultTitle">游戏结束</div>
+                <div class="score-display">
+                    <div class="score-number" id="finalScore">0</div>
+                    <div class="score-text">分 / 30分</div>
+                </div>
+                <div id="resultMessage"></div>
+            </div>
+            
+            <!-- 全对才显示的获奖登记链接 -->
+            <div id="winnerLinkSection" class="hidden">
+                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                    <h3 style="color: #155724; margin-bottom: 15px;">🎉 恭喜您全部答对！</h3>
+                    <p style="color: #155724; margin-bottom: 15px;">您可以点击下方链接填写获奖记录：</p>
+                    <a href="https://xipdawmc.jsjform.com/f/Xo5Lw3" target="_blank" 
+                       style="display: inline-block; background: #28a745; color: white; padding: 15px 25px; 
+                              border-radius: 10px; text-decoration: none; font-weight: bold; 
+                              box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3); 
+                              transition: all 0.3s ease;">
+                        📝 填写获奖记录登记表
+                    </a>
+                    <p style="color: #155724; font-size: 12px; margin-top: 10px; opacity: 0.8;">
+                        点击链接将在新窗口中打开表单
+                    </p>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="restartGame()">再玩一次</button>
+        </div>
+    </div>
+    
+    <!-- 庆祝动画容器 -->
+    <div id="celebration" class="celebration hidden"></div>
+    
+    <script>
+        // 完整灯谜题库
+        const riddleBank = [
+            {
+                question: "千里相逢在花前",
+                hint: "打一字",
+                options: ["董", "重", "种", "童"],
+                answer: 1,
+                explanation: "千里相逢=重，在花前=艹，合起来是'重'"
+            },
+            {
+                question: "一月一日非今天",
+                hint: "打一字",
+                options: ["明", "旦", "春", "朝"],
+                answer: 0,
+                explanation: "一月一日=明，非今天表示不是'今'字"
+            },
+            {
+                question: "半部春秋",
+                hint: "打一字",
+                options: ["秦", "春", "季", "香"],
+                answer: 0,
+                explanation: "春秋的一半，春字的一半是'秦'"
+            },
+            {
+                question: "十五的月亮",
+                hint: "打一成语",
+                options: ["正大光明", "圆圆满满", "十全十美", "光明正大"],
+                answer: 0,
+                explanation: "十五的月亮最圆最亮，寓意正大光明"
+            },
+            {
+                question: "无头无尾一亩田",
+                hint: "打一字",
+                options: ["鱼", "田", "由", "申"],
+                answer: 0,
+                explanation: "鱼字去掉头尾，中间像一亩田"
+            },
+            {
+                question: "一人一张口，口下长只手",
+                hint: "打一字",
+                options: ["拿", "取", "掌", "拍"],
+                answer: 0,
+                explanation: "人+口+手=拿"
+            },
+            {
+                question: "山上还有山",
+                hint: "打一字",
+                options: ["出", "岳", "峰", "崎"],
+                answer: 0,
+                explanation: "山上还有山，两个山字叠起来是'出'"
+            },
+            {
+                question: "十张口，一颗心",
+                hint: "打一字",
+                options: ["思", "想", "忆", "念"],
+                answer: 0,
+                explanation: "十个口加一个心，组成'思'字"
+            },
+            {
+                question: "说它小，下边大，说它大，上边小",
+                hint: "打一字",
+                options: ["尖", "小", "大", "上"],
+                answer: 0,
+                explanation: "尖字上小下大"
+            },
+            {
+                question: "一只黑狗，不叫不吼",
+                hint: "打一字",
+                options: ["默", "静", "墨", "黑"],
+                answer: 2,
+                explanation: "黑色的狗，不叫不吼，指墨水"
+            }
+            ,
+            {
+                question: "有心走不快，见水装不完",
+                hint: "打一字",
+                options: ["慢", "满", "漫", "蛮"],
+                answer: 1,
+                explanation: "有心是'慢'，见水是'满'"
+            },
+            {
+                question: "一口咬住多半截",
+                hint: "打一字",
+                options: ["名", "各", "多", "夕"],
+                answer: 0,
+                explanation: "一口咬住'多'字的多半截，剩下'名'"
+            },
+            {
+                question: "水上工程",
+                hint: "打一字",
+                options: ["汞", "江", "汪", "汗"],
+                answer: 0,
+                explanation: "水+工=汞"
+            },
+            {
+                question: "拱手让人",
+                hint: "打一字",
+                options: ["供", "共", "拱", "恭"],
+                answer: 0,
+                explanation: "拱手让人，拱+人=供"
+            },
+            {
+                question: "走是错的",
+                hint: "打一字",
+                options: ["赵", "起", "越", "趋"],
+                answer: 0,
+                explanation: "走+错的一部分=赵"
+            },
+            {
+                question: "白头翁",
+                hint: "打一字",
+                options: ["翁", "老", "伯", "公"],
+                answer: 0,
+                explanation: "白头翁就是'翁'字"
+            },
+            {
+                question: "四面都是山，山山都相连",
+                hint: "打一字",
+                options: ["田", "回", "囚", "困"],
+                answer: 0,
+                explanation: "四面都是山，形成田字形状"
+            },
+            {
+                question: "一点一横长，一撇到南洋，南洋有个人，只有一寸长",
+                hint: "打一字",
+                options: ["府", "付", "符", "附"],
+                answer: 0,
+                explanation: "按笔画顺序组成'府'字"
+            },
+            {
+                question: "上不在上，下不在下，不可在上，且宜在下",
+                hint: "打一字",
+                options: ["一", "二", "三", "下"],
+                answer: 0,
+                explanation: "描述的是'一'字的位置特点"
+            },
+            {
+                question: "九十九",
+                hint: "打一字",
+                options: ["白", "百", "九", "十"],
+                answer: 0,
+                explanation: "九十九，差一就是一百，所以是'白'"
+            }
+            ,
+            {
+                question: "一加一不是二",
+                hint: "打一字",
+                options: ["王", "土", "十", "工"],
+                answer: 0,
+                explanation: "一加一在字形上组成'王'字"
+            },
+            {
+                question: "人不在其位",
+                hint: "打一字",
+                options: ["立", "位", "人", "住"],
+                answer: 0,
+                explanation: "人不在其位，就是'立'字"
+            },
+            {
+                question: "八十八",
+                hint: "打一字",
+                options: ["米", "来", "木", "林"],
+                answer: 0,
+                explanation: "八十八，形状像'米'字"
+            },
+            {
+                question: "刀出鞘",
+                hint: "打一字",
+                options: ["力", "刀", "切", "利"],
+                answer: 0,
+                explanation: "刀出鞘，只剩下'力'"
+            },
+            {
+                question: "十一个读书人",
+                hint: "打一字",
+                options: ["仕", "士", "学", "文"],
+                answer: 0,
+                explanation: "十一个读书人，十一+士=仕"
+            },
+            {
+                question: "四个人搬个木头",
+                hint: "打一字",
+                options: ["杰", "森", "林", "木"],
+                answer: 0,
+                explanation: "四个人搬木头，人+木=杰"
+            },
+            {
+                question: "一人在内",
+                hint: "打一字",
+                options: ["肉", "内", "人", "入"],
+                answer: 0,
+                explanation: "一人在内，人在内部，组成'肉'字"
+            },
+            {
+                question: "一大二小",
+                hint: "打一字",
+                options: ["奈", "大", "小", "尖"],
+                answer: 0,
+                explanation: "一大二小，组成'奈'字"
+            },
+            {
+                question: "土上有竹林，土下一寸金",
+                hint: "打一字",
+                options: ["等", "竹", "金", "寺"],
+                answer: 0,
+                explanation: "土上竹林，土下寸金，组成'等'字"
+            },
+            {
+                question: "大丈夫不得出头",
+                hint: "打一字",
+                options: ["天", "夫", "人", "大"],
+                answer: 0,
+                explanation: "大丈夫不得出头，去掉'大'字上面一横，变成'天'"
+            }
+        ];
+        
+        // 游戏状态
+        let riddles = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let selectedAnswer = -1;
+        
+        // 随机选择题目
+        function selectRandomRiddles() {
+            const availableRiddles = [...riddleBank];
+            riddles = [];
+            
+            for (let i = 0; i < 3; i++) {
+                const randomIndex = Math.floor(Math.random() * availableRiddles.length);
+                riddles.push(availableRiddles[randomIndex]);
+                availableRiddles.splice(randomIndex, 1);
+            }
+            
+            console.log('本次游戏题目：', riddles.map(r => r.question));
+        }
+        
+        // 初始化游戏
+        function initGame() {
+            console.log('开始初始化纯净版游戏...');
+            
+            try {
+                currentQuestion = 0;
+                score = 0;
+                correctAnswers = 0;
+                selectedAnswer = -1;
+                
+                selectRandomRiddles();
+                
+                document.getElementById('gameScreen').classList.remove('hidden');
+                document.getElementById('resultScreen').classList.add('hidden');
+                
+                showQuestion();
+                updateProgress();
+                
+                console.log('纯净版游戏初始化完成');
+            } catch (error) {
+                console.error('游戏初始化失败:', error);
+                document.getElementById('riddleText').textContent = '游戏初始化失败，请刷新页面重试';
+                document.getElementById('riddleHint').textContent = '错误详情: ' + error.message;
+            }
+        }
+        
+        // 显示题目
+        function showQuestion() {
+            if (currentQuestion >= riddles.length) {
+                showResult();
+                return;
+            }
+            
+            const riddle = riddles[currentQuestion];
+            document.getElementById('questionNumber').textContent = `第 ${currentQuestion + 1} 题`;
+            document.getElementById('riddleText').textContent = riddle.question;
+            document.getElementById('riddleHint').textContent = riddle.hint;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            riddle.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('nextBtn').disabled = true;
+            selectedAnswer = -1;
+        }
+        
+        // 选择答案
+        function selectOption(index) {
+            selectedAnswer = index;
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, i) => {
+                option.classList.remove('selected', 'correct', 'wrong');
+                if (i === index) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('nextBtn').disabled = false;
+        }
+        
+        // 下一题
+        function nextQuestion() {
+            if (selectedAnswer === -1) return;
+            
+            const riddle = riddles[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, i) => {
+                if (i === riddle.answer) {
+                    option.classList.add('correct');
+                } else if (i === selectedAnswer && i !== riddle.answer) {
+                    option.classList.add('wrong');
+                }
+            });
+            
+            if (selectedAnswer === riddle.answer) {
+                score += 10;
+                correctAnswers++;
+                showCelebration();
+            }
+            
+            setTimeout(() => {
+                currentQuestion++;
+                updateProgress();
+                showQuestion();
+            }, 1500);
+        }
+        
+        // 更新进度条
+        function updateProgress() {
+            const progress = (currentQuestion / riddles.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        // 显示结果
+        function showResult() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = score;
+            
+            if (correctAnswers === 3) {
+                // 只有全部答对才显示获奖链接
+                document.getElementById('winnerLinkSection').classList.remove('hidden');
+                document.getElementById('resultTitle').textContent = '🎉 恭喜全对！';
+                document.getElementById('resultMessage').textContent = '您答对了所有题目，太棒了！';
+                document.getElementById('resultTitle').className = 'result-title result-excellent';
+                
+                if (score === 30) {
+                    showCelebration();
+                }
+            } else {
+                // 有错误就不显示获奖链接
+                document.getElementById('winnerLinkSection').classList.add('hidden');
+                document.getElementById('resultTitle').textContent = '继续努力！';
+                document.getElementById('resultMessage').textContent = `您答对了 ${correctAnswers}/3 题，得分 ${score} 分。再试一次吧！`;
+                document.getElementById('resultTitle').className = 'result-title result-poor';
+            }
+        }
+        
+        // 显示庆祝动画
+        function showCelebration() {
+            const celebration = document.getElementById('celebration');
+            celebration.classList.remove('hidden');
+            celebration.innerHTML = '';
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.backgroundColor = ['#ff6b6b', '#ffa500', '#ff1744', '#4caf50', '#2196f3'][Math.floor(Math.random() * 5)];
+                celebration.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                celebration.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // 重新开始游戏
+        function restartGame() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            initGame();
+        }
+        
+        // 页面加载完成后立即初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('纯净版页面加载完成，立即初始化游戏...');
+            initGame();
+        });
+        
+        // 备用初始化
+        window.addEventListener('load', function() {
+            if (document.getElementById('riddleText').textContent === '正在加载题目...') {
+                console.log('备用初始化触发');
+                initGame();
+            }
+        });
+        
+        // 添加键盘支持
+        document.addEventListener('keydown', function(e) {
+            if (e.key >= '1' && e.key <= '4') {
+                const index = parseInt(e.key) - 1;
+                const options = document.querySelectorAll('.option');
+                if (options[index] && !document.getElementById('gameScreen').classList.contains('hidden')) {
+                    selectOption(index);
+                }
+            } else if (e.key === 'Enter') {
+                const nextBtn = document.getElementById('nextBtn');
+                if (!nextBtn.disabled && !document.getElementById('gameScreen').classList.contains('hidden')) {
+                    nextQuestion();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
