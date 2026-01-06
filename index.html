@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新春猜灯谜大赛 - 纯净版</title>
+    <title>新春猜灯谜大赛</title>
     <style>
         * {
             margin: 0;
@@ -408,7 +408,7 @@
             <h1>🏮 新春猜灯谜大赛 🏮</h1>
             <p>传统文化，智慧挑战</p>
             <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
-                题库共30题 · 每次随机3题 · 纯净游戏版
+                题库共30题 · 每次随机3题 · 全对有奖
             </div>
         </div>
         
@@ -612,8 +612,7 @@
                 options: ["白", "百", "九", "十"],
                 answer: 0,
                 explanation: "九十九，差一就是一百，所以是'白'"
-            }
-            ,
+            },
             {
                 question: "一加一不是二",
                 hint: "打一字",
@@ -709,7 +708,7 @@
         
         // 初始化游戏
         function initGame() {
-            console.log('开始初始化纯净版游戏...');
+            console.log('开始初始化游戏...');
             
             try {
                 currentQuestion = 0;
@@ -725,7 +724,7 @@
                 showQuestion();
                 updateProgress();
                 
-                console.log('纯净版游戏初始化完成');
+                console.log('游戏初始化完成');
             } catch (error) {
                 console.error('游戏初始化失败:', error);
                 document.getElementById('riddleText').textContent = '游戏初始化失败，请刷新页面重试';
@@ -820,7 +819,7 @@
                 // 只有全部答对才显示获奖链接
                 document.getElementById('winnerLinkSection').classList.remove('hidden');
                 document.getElementById('resultTitle').textContent = '🎉 恭喜全对！';
-                document.getElementById('resultMessage').textContent = '您答对了所有题目，太棒了！';
+                document.getElementById('resultMessage').textContent = '您答对了所有题目，可以填写获奖记录！';
                 document.getElementById('resultTitle').className = 'result-title result-excellent';
                 
                 if (score === 30) {
@@ -829,8 +828,8 @@
             } else {
                 // 有错误就不显示获奖链接
                 document.getElementById('winnerLinkSection').classList.add('hidden');
-                document.getElementById('resultTitle').textContent = '继续努力！';
-                document.getElementById('resultMessage').textContent = `您答对了 ${correctAnswers}/3 题，得分 ${score} 分。再试一次吧！`;
+                document.getElementById('resultTitle').textContent = '😔 未能全对';
+                document.getElementById('resultMessage').textContent = `您答对了 ${correctAnswers}/3 题，需要全部答对才能获得奖励。`;
                 document.getElementById('resultTitle').className = 'result-title result-poor';
             }
         }
@@ -864,8 +863,16 @@
         
         // 页面加载完成后立即初始化
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('纯净版页面加载完成，立即初始化游戏...');
-            initGame();
+            console.log('页面加载完成，立即初始化游戏...');
+            
+            try {
+                initGame();
+                console.log('游戏初始化成功');
+            } catch (error) {
+                console.error('游戏初始化失败:', error);
+                document.getElementById('riddleText').textContent = '游戏初始化失败，请刷新页面重试';
+                document.getElementById('riddleHint').textContent = '错误详情: ' + error.message;
+            }
         });
         
         // 备用初始化
